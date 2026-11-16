@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GB Artisans Store — QA Practice Build v1.0</title>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f4f6f9;
+            color: #1f2937;
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #0f172a;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .product {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .product:last-child {
+            border-bottom: none;
+        }
+
+        button {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button.secondary {
+            background: #64748b;
+        }
+
+        button.secondary:hover {
+            background: #475569;
+        }
+
+        input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            width: 180px;
+            text-transform: uppercase;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .total-row {
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 8px;
+        }
+
+        .msg {
+            font-size: 0.85rem;
+            margin-top: 6px;
+            color: #059669;
+        }
+
+        .err {
+            color: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <span class="badge">QA Staging Environment • Build v1.0</span>
+
+        <h1>GB Artisans Online Store</h1>
+
+        <p>
+            <strong>Client Business Rules:</strong>
+            Standard shipping is <strong>500 PKR</strong>.
+            If Cart > <strong>3,000 PKR</strong>,
+            shipping is <strong>FREE</strong>.
+            Promo code <strong>GBYOUTH</strong> gives
+            <strong>10% off</strong>.
+            Both true = Free Shipping + 10% off.
+        </p>
+
+        <div class="product">
+            <div>
+                <strong>Apricot Wood Carved Bowl</strong>
+                <br>
+                <small>Handcrafted in Hunza • 2,000 PKR</small>
+            </div>
+
+            <button onclick="addItem('Apricot Wood Carved Bowl', 2000)">
+                + Add (2,000 PKR)
+            </button>
+        </div>
+
+        <div class="product">
+            <div>
+                <strong>Hand-Woven Pashmina Shawl</strong>
+                <br>
+                <small>Artisan Loomed in Gilgit • 4,000 PKR</small>
+            </div>
+
+            <button onclick="addItem('Hand-Woven Pashmina Shawl', 4000)">
+                + Add (4,000 PKR)
+            </button>
+        </div>
+
+        <div class="product">
+            <div>
+                <strong>Natural Ruby & Silver Pendant</strong>
+                <br>
+                <small>Mined in Nagar • 1,500 PKR</small>
+            </div>
+
+            <button onclick="addItem('Natural Ruby & Silver Pendant', 1500)">
+                + Add (1,500 PKR)
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0; font-size:1.2rem;">
+                Shopping Cart & Checkout
+            </h2>
+
+            <button class="secondary" onclick="resetCart()">
+                Reset Cart
+            </button>
+        </div>
+
+        <ul id="cartList" style="padding-left:20px; color:#475569;">
+            <li>Cart is empty</li>
+        </ul>
+
+        <div style="margin:16px 0;">
+            <input
+                type="text"
+                id="promoInput"
+                placeholder="Promo code (e.g. GBYOUTH)"
+            >
+
+            <button onclick="applyPromo()">Apply Code</button>
+
+            <div id="promoMsg" class="msg"></div>
+        </div>
+
+        <div class="summary-row">
+            <span>Cart Subtotal</span>
+            <span id="subtotal">0 PKR</span>
+        </div>
+
+        <div class="summary-row">
+            <span>Promo Discount (10%)</span>
+            <span id="discount">-0 PKR</span>
+        </div>
+
+        <div class="summary-row">
+            <span>Shipping Fee</span>
+            <span id="shipping">0 PKR</span>
+        </div>
+
+        <div class="summary-row total-row">
+            <span>Final Payable Total</span>
+            <span id="total">0 PKR</span>
+        </div>
+
+    </div>
+
+    <script>
+        let cart = [];
+        let promoApplied = false;
+
+        function addItem(name, price) {
+            cart.push({ name, price });
+            render();
+        }
+
+        function resetCart() {
+            cart = [];
+            promoApplied = false;
+
+            document.getElementById('promoInput').value = '';
+            document.getElementById('promoMsg').textContent = '';
+
+            render();
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promoInput').value
+                .trim()
+                .toUpperCase();
+
+            const msg = document.getElementById('promoMsg');
+
+            if (code === 'GBYOUTH') {
+                promoApplied = true;
+
+                msg.textContent =
+                    'Promo code GBYOUTH applied (10% discount)!';
+
+                msg.className = 'msg';
+
+            } else {
+                promoApplied = false;
+
+                msg.textContent = 'Invalid promo code.';
+                msg.className = 'msg err';
+            }
+
+            render();
+        }
+
+        function render() {
+            const list = document.getElementById('cartList');
+
+            if (cart.length === 0) {
+                list.innerHTML = '<li>Cart is empty</li>';
+
+                document.getElementById('subtotal').textContent = '0 PKR';
+                document.getElementById('discount').textContent = '-0 PKR';
+                document.getElementById('shipping').textContent = '0 PKR';
+                document.getElementById('total').textContent = '0 PKR';
+
+                return;
+            }
+
+            list.innerHTML = cart.map(item =>
+                `<li>${item.name} — ${item.price.toLocaleString()} PKR</li>`
+            ).join('');
+
+            const subtotal = cart.reduce(
+                (sum, item) => sum + item.price,
+                0
+            );
+
+            const discount = promoApplied
+                ? subtotal * 0.10
+                : 0;
+
+            // INTENTIONAL DEFECT FOR QA LAB (BUG-001)
+            // Developer mistakenly required (!promoApplied) for free shipping.
+
+            let shipping = 500;
+
+            if (subtotal > 3000 && !promoApplied) {
+                shipping = 0;
+            }
+
+            const total = subtotal - discount + shipping;
+
+            document.getElementById('subtotal').textContent =
+                `${subtotal.toLocaleString()} PKR`;
+
+            document.getElementById('discount').textContent =
+                `-${discount.toLocaleString()} PKR`;
+
+            document.getElementById('shipping').textContent =
+                `${shipping.toLocaleString()} PKR`;
+
+            document.getElementById('total').textContent =
+                `${total.toLocaleString()} PKR`;
+        }
+    </script>
+
+</body>
+</html>
